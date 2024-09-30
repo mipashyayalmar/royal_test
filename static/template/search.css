@@ -1,0 +1,236 @@
+.sidebar {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 250px;
+    background-color: #f8f9fa;
+    padding: 20px;
+    overflow-y: auto;
+}
+.main-content {
+    margin-left: 270px;
+    padding: 20px;
+}
+@media screen and (max-width: 600px) {
+.main-content {
+    margin-left: 100px;
+    padding: 7px 1px 4px 0px;
+}
+}
+.subcat-products {
+    display: none;
+    display: flex;
+    flex-direction: row;
+}
+
+.product-container {
+display: flex;
+flex-wrap: wrap;
+justify-content: space-between;
+margin-left: 50px;
+padding:20px 20px  100px 20px;
+margin: 8px -27px 15px 227px;
+border:1px solid black;
+}
+.product-card {
+width: 65%;
+box-sizing: border-box;
+margin: 0px 20px 20px;
+}
+
+@media screen and (max-width:600px) {
+.product-card {
+    width: 61%;
+    box-sizing: border-box;
+    margin: 2px 0px 20px;
+}
+}
+
+@media screen and (min-width:600px) and (max-width: 860px) {
+.product-card {
+    width: 185px;
+    box-sizing: border-box;
+    margin-bottom: 20px;
+}
+}
+
+@media screen and (min-width: 860px)  {
+.product-card {
+    width: 190px;
+    box-sizing: border-box;
+    margin-bottom: 20px;
+}
+}
+
+element.style {
+display: flex;
+flex-direction: row;
+}
+
+@import url(//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css);
+
+@import url(https://fonts.googleapis.com/css?family=Titillium+Web:300);
+.fa-2x {
+font-size: 2em;
+}
+.fa {
+position: relative;
+display: table-cell;
+width: 60px;
+height: 36px;
+text-align: center;
+vertical-align: middle;
+font-size:20px;
+}
+
+
+.main-menu:hover,nav.main-menu.expanded {
+width:250px;
+overflow:visible;
+}
+
+
+.main-menu {
+margin-top:7.5%;
+background-color: transperent;
+border-right:1px solid #e5e5e5;
+position:absolute;
+top:0;
+bottom:0;
+height:150%;
+left:0;
+width:60px;
+overflow:hidden;
+-webkit-transition:width .05s linear;
+transition:width .05s linear;
+-webkit-transform:translateZ(0) scale(1,1);
+z-index:1000;
+}
+@media screen and (max-width: 600px) {
+.main-menu {
+    background-color: rgba(255, 255, 255, 0.8);
+
+}
+}
+
+@media screen and (min-width: 700px) {
+.main-menu {
+    width:250px;
+
+}
+}
+
+@media screen and (max-width: 720px) {
+.main-menu {
+    margin-top: 12%;
+}
+.product-container {
+   
+    padding: -29px -11px 67px 20px;
+    margin: 8px -131px 0px 0;
+    border: 1px solid black;
+}
+}
+@media screen and (min-width: 1050px) {
+.main-menu {
+    margin-top: 3.5%;
+}
+}
+
+.main-menu>ul {
+margin:7px 0;
+}
+.main-category{
+
+color:black;
+
+}
+
+.main-menu li {
+position:relative;
+display:block;
+width:250px;
+}
+
+.main-menu li>a {
+position:relative;
+display:table;
+border-collapse:collapse;
+border-spacing:0;
+color:#999;
+font-family: arial;
+font-size: 14px;
+text-decoration:none;
+-webkit-transform:translateZ(0) scale(1,1);
+-webkit-transition:all .1s linear;
+transition:all .1s linear;
+
+}
+
+.main-menu .nav-icon {
+position:relative;
+display:table-cell;
+width:60px;
+height:36px;
+text-align:center;
+vertical-align:middle;
+font-size:18px;
+}
+
+.main-menu .nav-text {
+position:relative;
+display:table-cell;
+vertical-align:middle;
+width:190px;
+font-family: 'Titillium Web', sans-serif;
+}
+
+.main-menu>ul.logout {
+position:absolute;
+left:0;
+bottom:0;
+}
+
+.no-touch .scrollable.hover {
+overflow-y:hidden;
+}
+
+.no-touch .scrollable.hover:hover {
+overflow-y:auto;
+overflow:visible;
+}
+
+a:hover,a:focus {
+text-decoration:none;
+}
+
+nav {
+-webkit-user-select:none;
+-moz-user-select:none;
+-ms-user-select:none;
+-o-user-select:none;
+user-select:none;
+}
+
+nav ul,nav li {
+outline:0;
+margin:0;
+padding:0;
+}
+.main-menu li:hover>a,nav.main-menu li.active>a,.dropdown-menu>li>a:hover,.dropdown-menu>li>a:focus,.dropdown-menu>.active>a,.dropdown-menu>.active>a:hover,.dropdown-menu>.active>a:focus,.no-touch .dashboard-page nav.dashboard-menu ul li:hover a,.dashboard-page nav.dashboard-menu ul li.active a {
+color:#fff;
+background-color:#000000;
+}
+.area {
+float: left;
+background: #e2e2e2;
+width: 100%;
+height: 100%;
+}
+@font-face {
+font-family: 'Titillium Web';
+font-style: normal;
+font-weight: 300;
+src: local('Titillium WebLight'), local('TitilliumWeb-Light'), url(http://themes.googleusercontent.com/static/fonts/titilliumweb/v2/anMUvcNT0H1YN4FII8wpr24bNCNEoFTpS2BTjF6FB5E.woff) format('woff');
+}

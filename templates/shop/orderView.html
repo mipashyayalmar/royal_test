@@ -1,0 +1,293 @@
+{% extends 'shop/basic.html' %}
+{% block title%} Orders - Food Mania{% endblock %}
+
+{% load static %}
+{% block css %}
+<link href="{% static 'template/all_template.css' %}" rel="stylesheet">
+{% endblock %}
+
+{% block body %}
+{% if user.is_authenticated %}
+<div class="container" id="cont" style=" padding-bottom: 89px;">
+    <div class="table-wrapper">
+        <div class="table-title">
+            <div class="row">
+                <div class="col-sm-8">
+                    <h2>Order <b>Details</b></h2>
+                </div>
+                <div class="col-sm-8">
+                    <form id="filterForm" method="post" action="">
+                        {% csrf_token %}
+                        <input type="date" id="startDate" name="start_date" class="form-control" style="width: auto; display: inline-block;">
+                        <input type="date" id="endDate" name="end_date" class="form-control" style="width: auto; display: inline-block;">
+                        <button type="submit" id="filterDate" class="btn btn-primary">Filter and Calculate Total</button>
+                        <a href="" class="btn btn-primary"><span>Refresh List</span></a>
+                        <a href="#" onclick="window.print()" class="btn btn-info no-print"><i class="material-icons">&#xE24D;</i> <span>Print</span></a>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <table class="table table-striped table-hover">
+            <thead>
+                <tr>
+                    <th>No.</th>
+                    <th>Order Id</th>
+                    <th>Name</th>
+                    <th>Address</th>
+                    <th>Email</th>
+                    <th>Phone</th>
+                    <th>Order Date</th>
+                    <th>Amount</th>
+                    <th>Items</th>
+                    <th>Update</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for i in orderHistory %}
+                <tr>
+                    <td class="count"></td>
+                    <td>{{ i.order_id }}</td>
+                    <td>{{ i.name }}</td>
+                    <td data-toggle="tooltip" title="{{ i.address }}">{{ i.address|slice:"0:25" }}..</td>
+                    <td>{{ i.email }}</td>
+                    <td>{{ i.phone }}</td>
+                    <td>{{ i.timestamp }}</td>
+                    <td>{{ i.amount }}</td>
+                    <td><a href="#" id="click{{ i.order_id }}" class="view" title="View Details"><i class="material-icons">&#xE5C8;</i></a></td>
+                    <td><a href="{% url 'shop:update_order' i.order_id %}" class="btn btn-warning">Update</a></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <div id="citems"></div>
+        <div>
+            <li class="list-group-item d-flex justify-content-between align-items-center" style="background: bisque; font-weight: bold; font-size: 19px;">
+                Selected Date For Check Amount:
+                <span class="badge badge-danger badge-pill" style="font-size: 19px;">Rs. {{ total_amount }}</span>
+            </li>
+            
+    </div>
+</div>
+{% else %}
+    <div id="cont2">
+        <div class="alert alert-info">
+            <font style="font-size:22px"><center>You need to <strong><a class="alert-link" data-toggle="modal" data-target="#loginModal">Login</a></strong></center></font>
+        </div>
+    </div>
+{% endif %}
+{% endblock %}
+
+{% block js %}
+<script>
+$(document).ready(function() {
+    {% for i in orderHistory %}
+    $('#click{{i.order_id}}').click(function() {
+        $('#citems').empty();
+        let orderDetails = `
+            <div>
+                <b>Order Id: {{i.order_id}}</b><br>
+                <b>Name: {{i.name}}</b><br>
+                <b>Address: {{i.address}}</b><br>
+                <b>Email: {{i.email}}</b><br>
+                <b>Phone: {{i.phone}}</b><br>
+                <b>Timestamp: {{i.timestamp}}</b>
+            </div>
+        `;
+        $('#citems').append(orderDetails);
+        
+        let mydata = "{{i.items_json}}";
+        mydata = mydata.replace(/&quot;/g, '"');
+        let obj = JSON.parse(mydata);
+        let totalAmount = 0;
+
+        for (let item in obj) {
+            let name = obj[item][1];
+            let qty = obj[item][0];
+            let itemPrice = obj[item][2];
+            let sumPrice = qty * itemPrice;
+            totalAmount += sumPrice;
+
+            let mystr = `<li class="list-group-item d-flex justify-content-between align-items-center">
+                            ${name} 
+                            <span class="badge badge-primary badge-pill">${qty} x Rs. ${itemPrice} = <span class="badge badge-danger badge-pill" style="font-size: 0.8rem;">Rs. ${sumPrice}</span></span>
+                          </li>`;
+            $('#citems').append(mystr);
+        }
+
+        let totalStr = `<li class="list-group-item d-flex justify-content-between align-items-center" style="background: bisque; font-weight: bold; font-size: 19px;">
+                            TOTAL PRICE:
+                            <span class="badge badge-danger badge-pill" id="totalPrice" style="font-size: 19px;">Rs. ${totalAmount} /-</span>
+                        </li>`;
+        $('#citems').append(totalStr);
+
+        // Open new popup window
+        let popupContent = $('#citems').html();
+        let popupWindow = window.open('', 'Order Details', 'width=600,height=400');
+        popupWindow.document.write('<html><head><title>Order Details</title>');
+        popupWindow.document.write('<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">');
+        popupWindow.document.write('<style>@media print { @page { size: 105mm auto; margin: 10mm; } body { width: 105mm; margin: 0; } .no-print { display: none; } }</style>');
+        popupWindow.document.write('</head><body>');
+        popupWindow.document.write('<div class="container mt-4">');
+        popupWindow.document.write(`
+            <div class="table-title">
+                <div class="row">
+                    <div class="col-sm-4">
+                        <h2>Order <b>Details</b></h2>
+                    </div>
+                    <div class="col-sm-8 no-print">						
+                        <a href="" class="btn btn-primary"><i class="material-icons">&#xE863;</i> <span>Refresh List</span></a>
+                        <a href="#" onclick="window.print()" class="btn btn-info"><i class="material-icons">&#xE24D;</i> <span>Print</span></a>
+                    </div>
+                </div>
+            </div>
+        `);
+        popupWindow.document.write(popupContent);
+        popupWindow.document.write('</div></body></html>');
+        popupWindow.document.close();
+    });
+    {% endfor %}
+
+    // Update Popover
+    $('#popcart').popover();
+    updatePopover(cart);
+
+    function updatePopover(cart) {
+        var popStr = "";
+        popStr = popStr + "<h5> Click <a href='/shop/checkout'><button class='btn btn-primary'>Here</button></a> to order </h5><div class='mx-2 my-2'>";
+
+        $.each(cart, function (index, value) {
+            popStr = popStr + "<li class='list-group-item d-flex justify-content-between align-items-center'>";
+            popStr = popStr + value[1] + " <span class='badge badge-primary badge-pill'>" + value[0] + " x Rs. " + value[2] + " = <span class='badge badge-danger badge-pill'>Rs. " + (value[0] * value[2]) + "</span></span></li>";
+        });
+
+        let totalAmount = 0;
+        $.each(cart, function (index, value) {
+            totalAmount += (value[0] * value[2]);
+        });
+
+        popStr = popStr + "<li class='list-group-item d-flex justify-content-between align-items-center' style='background: bisque; font-weight: bold; font-size: 19px;'>TOTAL PRICE: <span class='badge badge-danger badge-pill' style='font-size: 19px;'>Rs. " + totalAmount + " /-</span></li></div>";
+        $('#popcart').attr('data-content', popStr);
+    }
+});
+
+
+function updatePopover(cart) {
+    var popStr = "<h5> Click <a href='/shop/checkout'><button class='btn btn-primary'>Here</button></a> to order </h5><div class='mx-2 my-2'>";
+    var i = 1;
+    var total = 0;
+    for (var item in cart) {
+        popStr += `<b>${i++}</b>. ${cart[item][1]} / ${cart[item][3]}... Qty: ${cart[item][0]}<br>`;
+        total += cart[item][0] * cart[item][2];
+    }
+    popStr += `<br><b>Total = ${total}</b>`;
+    document.getElementById("popcart").setAttribute('data-content', popStr);
+    $('#popcart').popover();
+}
+
+// Initialize cart from localStorage
+var cart = localStorage.getItem('cart') ? JSON.parse(localStorage.getItem('cart')) : {};
+updateCart(cart);
+
+$('.container').on('click', 'button.cart', function() {
+    var idstr = this.id.toString();
+    if (cart[idstr] != undefined) {
+        cart[idstr][0] += 1;
+        showNotification(`${cart[idstr][1]} quantity increased to ${cart[idstr][0]}`);
+    } else {
+        var name = document.getElementById(`namepr${idstr}`).innerHTML;
+        var price = document.getElementById(`pricepr${idstr}`).innerHTML;
+        var langName = document.getElementById(`langnamepr${idstr}`).innerHTML;
+        cart[idstr] = [1, name, parseInt(price), langName];
+        showNotification(`${cart[idstr][1]} added to cart`);
+    }
+    updateCart(cart);
+});
+
+function updateCart(cart) {
+    // Merging old and new cart data
+    for (var item in cart) {
+        if (cartData[item] != undefined) {
+            cartData[item][0] += cart[item][0];
+        } else {
+            cartData[item] = cart[item];
+        }
+    }
+    localStorage.setItem('cart', JSON.stringify(cart));
+    updatePopover(cart);
+    renderCartItems();
+}
+
+function showNotification(message) {
+    var alertBox = document.createElement('div');
+    alertBox.className = 'alert alert-success';
+    alertBox.innerHTML = message;
+    document.querySelector('.container').insertBefore(alertBox, document.querySelector('.container').firstChild);
+
+    setTimeout(function() {
+        alertBox.remove();
+    }, 2000);
+}
+
+
+
+
+
+function updatePopover(cart) {
+    var popStr = "<h5> Click <a href='/shop/checkout'><button class='btn btn-primary'>Here</button></a> to order </h5><div class='mx-2 my-2'>";
+    var i = 1;
+    var total = 0;
+    for (var item in cart) {
+        popStr += `<b>${i++}</b>. ${cart[item][1]} / ${cart[item][3]}... Qty: ${cart[item][0]}<br>`;
+        total += cart[item][0] * cart[item][2];
+    }
+    popStr += `<br><b>Total = ${total}</b>`;
+    document.getElementById("popcart").setAttribute('data-content', popStr);
+    $('#popcart').popover();
+}
+
+// Initialize cart from localStorage
+var cart = localStorage.getItem('cart') ? JSON.parse(localStorage.getItem('cart')) : {};
+updateCart(cart);
+
+$('.container').on('click', 'button.cart', function() {
+    var idstr = this.id.toString();
+    if (cart[idstr] != undefined) {
+        cart[idstr][0] += 1;
+        showNotification(`${cart[idstr][1]} quantity increased to ${cart[idstr][0]}`);
+    } else {
+        var name = document.getElementById(`namepr${idstr}`).innerHTML;
+        var price = document.getElementById(`pricepr${idstr}`).innerHTML;
+        var langName = document.getElementById(`langnamepr${idstr}`).innerHTML;
+        cart[idstr] = [1, name, parseInt(price), langName];
+        showNotification(`${cart[idstr][1]} added to cart`);
+    }
+    updateCart(cart);
+});
+
+function updateCart(cart) {
+    // Merging old and new cart data
+    for (var item in cart) {
+        if (cartData[item] != undefined) {
+            cartData[item][0] += cart[item][0];
+        } else {
+            cartData[item] = cart[item];
+        }
+    }
+    localStorage.setItem('cart', JSON.stringify(cart));
+    updatePopover(cart);
+    renderCartItems();
+}
+
+function showNotification(message) {
+    var alertBox = document.createElement('div');
+    alertBox.className = 'alert alert-success';
+    alertBox.innerHTML = message;
+    document.querySelector('.container').insertBefore(alertBox, document.querySelector('.container').firstChild);
+
+    setTimeout(function() {
+        alertBox.remove();
+    }, 2000);
+}
+</script>
+{% endblock %}

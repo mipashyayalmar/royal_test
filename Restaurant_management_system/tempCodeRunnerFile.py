@@ -1,0 +1,2 @@
+
+EMAIL_USE_SSL = False 

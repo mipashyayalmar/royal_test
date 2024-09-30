@@ -1,0 +1,148 @@
+{% extends 'base.html' %} {% load static %} {% block content %}
+<style>
+  /* base.css */
+
+/* base.css */
+
+section {
+  padding: 20px;
+  background-color: #f9f9f9;
+}
+
+article {
+  max-width: 1200px;
+  margin: auto;
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+h1 {
+  font-size: 2.5em;
+  margin-bottom: 20px;
+  color: #333;
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.column {
+  flex: 1;
+  min-width: 300px;
+  padding: 10px;
+}
+
+.figure {
+  text-align: center;
+  margin: 0;
+}
+
+.animated-img {
+  width: 100%;
+  height: auto;
+  max-height: 100%;
+  object-fit: cover;
+  animation: zoomIn 10s infinite alternate;
+}
+
+.figure-caption {
+  font-size: 1em;
+  color: #666;
+  margin-top: 10px;
+}
+
+/* Animation for the image */
+@keyframes zoomIn {
+  from {
+    transform: scale(1);
+  }
+  to {
+    transform: scale(1.1);
+  }
+}
+
+
+</style>
+<section>
+  <center>
+  
+    <a class="navbar-brand" href="/shop">ROYAL SHETKARI</a>
+  
+  
+    </button></center>
+  <article>
+    <h1>About Us</h1>
+    <!--Begin row-->
+    <div class="row">
+      <!--Begin col-->
+      <div class="column">
+        <p>
+          "हॉटेल रॉयल शेतकरी", भंडिशेगाव, पंढरपूर येथे स्थित आहे आणि पारंपारिक आकर्षण व आधुनिक आरामाचा उत्तम संगम असलेला एक प्रमुख निवास पर्याय आहे. अभि कोलवाले यांच्या मालकीचे हे कुटुंबीय चालवलेले हॉटेल सर्व पाहुण्यांसाठी एक संस्मरणीय अनुभव देण्यास समर्पित आहे.
+        </p>
+        
+        <p>
+          हॉटेलमध्ये लघुकालीन आणि दीर्घकाळी राहण्यासाठी योग्य असलेल्या आरामदायक निवासाच्या सुविधा उपलब्ध आहेत. पाहुणे आरामदायक खोलीसह आवश्यक सुविधांचा आनंद घेऊ शकतात, जे मुक्त आणि व्यवसायिक प्रवाश्यांना अनुरूप आहेत.
+        </p>
+        
+        <p>
+          हॉटेलमध्ये विविध स्थानिक आणि प्रादेशिक खाद्यपदार्थांची सेवा करणारे एक रेस्टॉरंट आहे. वातावरण पारंपारिक सौंदर्य आणि आधुनिक आराम यांचे मिश्रण असलेले आहे, ज्यामुळे एक सुखद जेवणाचा अनुभव सुनिश्चित होतो.
+        </p>
+        
+        <p>
+          हॉटेल रॉयल शेतकरी सुविधाजनक स्थानावर स्थित असून पाहुण्यांना पंढरपूरच्या सांस्कृतिक आणि धार्मिक स्थळांचा सहजपणे अभ्यास करता येतो. याचे रणनीतिक स्थान क्षेत्रातील समृद्ध वारशाचा अभ्यास करण्यास इच्छुक प्रवाश्यांसाठी एक आदर्श आधार बनवते.
+        </p>
+        
+        <p>
+          अभि कोलवाले, मालक, प्रत्येक पाहुण्याला वैयक्तिक सेवा आणि लक्ष देण्याची खात्री करतात. हॉटेलच्या सुविधांमध्ये तत्पर खोली सेवा, प्रभावी हाऊसकीपिंग, आणि विश्वासार्ह फ्रंट डेस्क सहाय्य यांचा समावेश आहे, जे एकूण पाहुण्यांच्या अनुभवाला सुधारण्यासाठी उद्दिष्ट केले आहे.
+        </p>
+        
+        <p>
+          Hotel Royal Shetkari, located in Bhandishegaon, Pandharpur, is a premier lodging option that combines traditional charm with modern comfort. Owned by Abhi Kolawale, this family-run hotel is dedicated to providing a memorable stay for all guests.
+        </p>
+
+        <p>
+          The hotel offers a range of comfortable accommodations suited for both short-term and long-term stays. Guests can enjoy well-appointed rooms with essential amenities that cater to both leisure and business travelers.
+        </p>
+
+        <p>
+          On-site, the hotel features a restaurant serving a variety of local and regional cuisines. The ambiance is designed to blend traditional aesthetics with contemporary comforts, ensuring a pleasant dining experience.
+        </p>
+
+        <p>
+          Conveniently situated, Hotel Royal Shetkari allows guests to easily explore the cultural and religious landmarks of Pandharpur. Its strategic location makes it a perfect base for visitors interested in exploring the region’s rich heritage.
+        </p>
+
+        <p>
+          Abhi Kolawale, the owner, ensures that each guest receives personalized service and attention. The hotel's facilities include prompt room service, efficient housekeeping, and reliable front desk assistance, all aimed at enhancing the overall guest experience.
+        </p>
+      </div>
+      <!--End col-->
+
+      <!--Begin col-->
+      <div class="column">
+        <figure class="figure">
+          <img
+            src="{% static 'dist/img/favicon.png' %}"
+            alt="hotel Royal Shetkari"
+          />
+          <figcaption class="figure-caption">
+            Hotel Royal Shetkari
+          </figcaption>
+        </figure>
+      </div>
+      <!--End col-->
+
+  
+  <a class="navbar-brand" href="/shop">ROYAL SHETKARI</a>
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+    </div>
+    <!--End row-->
+  </article>
+</section>
+{% endblock %}

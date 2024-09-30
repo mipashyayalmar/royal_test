@@ -1,0 +1,259 @@
+{% extends 'shop/basic.html' %}
+{% block title%} Contact Us - Food Mania{% endblock %}
+{% block css %}
+{%load static%}
+<link href="{% static 'template/all_template.css' %}" rel="stylesheet">
+{% endblock %}
+{% block body %}
+<div class="contact2" style="background-image:url(http://127.0.0.1:8000/media/shop/images/map.jpg);height: 400px;" id="contact">
+  <div class="container">
+    <div class="row contact-container">
+      <div class="col-lg-12">
+        <div class="card card-shadow border-0">
+          <div class="row">
+            <div class="col-lg-8">
+              <div class="contact-box p-4">
+                <div class="row">
+                  <div class="col-lg-8">
+                    <h4 class="title">Contact Us</h4>
+                  </div>
+                </div>
+                <form action="/shop/contact/" method="POST">{% csrf_token %}
+                  <div class="form-group mt-3">
+                      <b><label for="name">Name:</label></b>
+                      <input type="text" class="form-control" id="name" name="name" placeholder="Enter Your Name" required>
+                  </div>
+                  <div class="form-group mt-3">
+                      <b><label for="email">Email:</label></b>
+                      <input type="email" class="form-control" id="email" name="email" placeholder="Enter Your Email" required>
+                  </div>
+                  <div class="form-group mt-3">
+                      <b><label for="phone">Phone No:</label></b>
+                      <div class="input-group mb-3">
+                          <div class="input-group-prepend">
+                            <span class="input-group-text" id="basic-addon">+91</span>
+                          </div>
+                          <input type="tel" class="form-control" id="phone" name="phone" aria-describedby="basic-addon" placeholder="Enter Your Phone Number" required pattern="[0-9]{10}">
+                      </div>
+                  </div>
+                  <div class="form-group mt-3">
+                    <b><label for="desc">Message:</label></b>
+                    <textarea class="form-control" id="desc" name="desc" rows="2" required minlength="6" placeholder="How May We Help You ?"></textarea>
+                  </div>
+                    <button type="submit" class="btn btn-danger-gradiant text-white border-0 py-2 px-3"><span> SUBMIT NOW <i class="ti-arrow-right"></i></span></button>
+                </form>
+              </div>
+            </div>
+            <div class="col-lg-4 bg-image" style="background-image:url(http://127.0.0.1:8000/media/shop/images/contact.jpg)">
+                    <div class="detail-box p-4">
+                      <h5 class="text-white font-weight-light mb-3">ADDRESS</h5>
+                      <p class="text-white op-7">601 Sherwood Ave. <br> San Bernandino </p>
+                      <h5 class="text-white font-weight-light mb-3 mt-4">CALL US</h5>
+                      <p class="text-white op-7">2515469442 <br> 6304468851</p>
+                      <div class="round-social light">
+                        <a href="https://mail.google.com/mail/?view=cm&fs=1&tf=1&to=darshanparmar263@gmail.com" class="ml-0 text-decoration-none text-white border border-white rounded-circle" target="_blank"><i class="far fa-envelope"></i></a>
+                        <a href="https://github.com/darshankparmar" class="text-decoration-none text-white border border-white rounded-circle" target="_blank"><i class="fab fa-github"></i></a>
+                        <a href="https://youtube.com/" class="text-decoration-none text-white border border-white rounded-circle" target="_blank"><i class="fab fa-youtube"></i></a>
+                      </div>
+                    </div>
+                  </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block js %}
+<script>
+
+$('#popcart').popover();
+updatePopover(cart);
+
+function updatePopover(cart) {
+    var popStr = "";
+    popStr = popStr + "<h5> Click <a href='/shop/checkout'><button class='btn btn-primary'>Here</button></a> to order </h5><div class='mx-2 my-2'>";
+    document.getElementById("popcart").setAttribute('data-content', popStr);
+    $('#popcart').popover();
+}
+
+{% if thank %}
+alert('Thanks for Contact with us. We will get back to you soon!');
+document.location = "/shop";
+{% endif %}
+
+
+// Initialize cart
+if (localStorage.getItem('cart') == null) {
+  var cart = {};
+} else {
+  cart = JSON.parse(localStorage.getItem('cart'));
+  updateCart(cart);
+}
+
+if (localStorage.getItem('cart') == null) {
+  var cart = {};
+} else {
+  cart = JSON.parse(localStorage.getItem('cart'));
+  updateCart(cart);
+}
+
+$('.container').on('click', 'button.cart', function() {
+  var idstr = this.id.toString();
+  if (cart[idstr] != undefined) {
+      cart[idstr][0] += 1;
+      showNotification(cart[idstr][1] + " quantity increased to " + cart[idstr][0]);
+  } else {
+      var name = document.getElementById('namepr' + idstr).innerHTML;
+      var price = document.getElementById('pricepr' + idstr).innerHTML;
+      cart[idstr] = [1, name, parseInt(price)];
+      showNotification(cart[idstr][1] + " added to cart");
+  }
+  updateCart(cart);
+});
+
+function updatePopover(cart) {
+  var popStr = "<div class='mx-2 my-2'>";
+  var i = 1;
+  var j = 0;
+  for(var item in cart) {
+      popStr += "<b>" + i + "</b>. " + cart[item][1].slice(0, 15) + "... (Qty: " + cart[item][0] + ')<br>';
+      i += 1;
+      j += 1;
+  }
+  if(j == 0) {
+      popStr += "<p><b> No item available in your cart </b></p></div><div class='mx-2 my-2'><a href='/shop'><button class='btn btn-primary'>Add items</button></a></div>";
+  } else {
+      popStr += "</div><a href='/shop/checkout'><button class='btn btn-primary' id='checkout'>Checkout</button></a> <a href='/shop/'><button class='btn btn-primary' onclick='clearCart()' id='clearCart'>Clear Cart</button></a>";
+  }
+  document.getElementById("popcart").setAttribute('data-content', popStr);
+  $('#popcart').popover();
+}
+
+function clearCart() {
+cart = JSON.parse(localStorage.getItem('cart'));
+for (var item in cart) {
+  document.getElementById('div' + item).innerHTML = '<button id="'+ item +'" class="btn btn-primary cart">Add to Cart</button>';
+}
+localStorage.clear();
+cart = {};
+updateCart(cart);
+}
+
+function updateCart(cart) {
+  var sum = 0;
+  var cartItems = '';
+  for (var item in cart) {
+      sum += cart[item][0];
+      cartItems += `<div class="product-card card align-items-center">
+          <div class="card-body">
+              <h5 class="card-title">${cart[item][1].slice(0, 20)}...</h5>
+              <h6 style="color: #ff0000">Rs. ${cart[item][2]} /-</h6>
+              <p>Quantity: ${cart[item][0]}</p>
+              <button id="minus${item}" class="btn btn-primary minus">-</button>
+              <span id="val${item}">${cart[item][0]}</span>
+              <button id="plus${item}" class="btn btn-primary plus">+</button>
+          </div>
+      </div>`;
+  }
+  localStorage.setItem('cart', JSON.stringify(cart));
+  document.getElementById('cart').innerHTML = sum;
+  document.getElementById('cartItems').innerHTML = cartItems;
+  updatePopover(cart);
+}
+
+$('.container').on("click", "button.minus", function() {
+  var a = this.id.slice(5);
+  cart[a][0] = Math.max(0, cart[a][0] - 1);
+  if(cart[a][0] == 0) {
+      showNotification(cart[a][1] + " removed from cart");
+      delete cart[a];
+  } else {
+      showNotification(cart[a][1] + " quantity decreased to " + cart[a][0]);
+  }
+  updateCart(cart);
+});
+
+$('.container').on("click", "button.plus", function() {
+  var a = this.id.slice(4);
+  cart[a][0] += 1;
+  showNotification(cart[a][1] + " quantity increased to " + cart[a][0]);
+  updateCart(cart);
+});
+
+function showNotification(message) {
+  var notification = document.getElementById('notification');
+  notification.innerText = message;
+  notification.style.display = 'block';
+  setTimeout(function() {
+      notification.style.display = 'none';
+  }, 2000);
+}
+
+updateCart(cart);
+
+</script>
+
+{% endblock %}
+
+
+
+
+
+
+
+
+
+
+
+
+
+{% comment %} 
+
+
+<form action="{% url 'shop:checkout' %}" method="post">{% csrf_token %}
+  <input type="hidden" name="user_id" id="user_id" value="{{ request.user.id }}">
+  <input type="hidden" name="amount" id="amount">
+  <!-- Other form fields -->
+  <div class="form-row">
+      <div class="form-group col-md-6">
+          <label for="name">Name</label>
+          <input type="text" class="form-control" id="name" name="name" placeholder="Name" required>
+      </div>
+      <div class="form-group col-md-6">
+          <label for="Email">Email</label>
+          <input type="email" class="form-control" id="email" name="email" placeholder="abc@gmail.com" required>
+      </div>
+  </div>
+  <div class="form-group">
+      <label for="Address1">Address</label>
+      <input type="text" class="form-control" id="address1" name="address1" placeholder="1234 Main St" required>
+  </div>
+  <div class="form-group">
+      <label for="Address2">Address Line 2</label>
+      <input type="text" class="form-control" id="address2" name="address2" placeholder="Apartment, studio, or floor">
+  </div>
+  <div class="form-row">
+      <div class="form-group col-md-6">
+          <label for="City">City</label>
+          <input type="text" class="form-control" id="city" name="city" placeholder="Surat" required>
+      </div>
+      <div class="form-group col-md-4">
+          <label for="State">State</label>
+          <input type="text" class="form-control" id="state" name="state" placeholder="Gujarat" required>
+      </div>
+      <div class="form-group col-md-2">
+          <label for="zip_code">Zip</label>
+          <input type="text" class="form-control" id="zip_code" name="zip_code" placeholder="xxxxxx" required pattern="[0-9]{6}">
+      </div>
+  </div>
+  <div class="form-group">
+      <label for="phone">Phone Number</label>
+      <input type="tel" class="form-control" id="phone" name="phone" placeholder="xxxxxxxxxx" required pattern="[0-9]{10}">
+  </div>
+  <div class="alert alert-info">
+    <strong>Info!</strong> Online payment is currently disabled, so please choose cash on delivery.
+  </div>
+  <button type="submit" class="btn btn-primary" name="onlinePay" disabled>Online Pay</button>
+  <button type="submit" class="btn btn-primary" name="cashOnDelivery">Cash On Delivery</button>
+</form> {% endcomment %}

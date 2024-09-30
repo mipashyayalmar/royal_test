@@ -1,0 +1,151 @@
+{% extends 'shop/basic.html' %}
+
+{% block title %} Update Order - Food Mania {% endblock %}
+{% block css %}
+<style>
+    #cont {
+        min-height: 609px;
+    }
+    .qty-input {
+        width: 70px;
+        display: inline-block;
+    }
+</style>
+{% endblock %}
+{% block body %}
+
+<div class="container my-5">
+    <h2>Check Your Order</h2>
+    <form method="post" action="/shop/updateorder/">{% csrf_token %}
+        <div class="form-group">
+            <label for="order_id">Order ID</label>
+            <input type="text" class="form-control" id="order_id" name="order_id" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Check Order</button>
+    </form>
+
+    {% if order_found %}
+    <div class="mt-5" id="cont">
+        <h2>Order Details</h2>
+        <p><strong>Order ID:</strong> {{ order.order_id }}</p>
+        <p><strong>Email:</strong> {{ order.email }}</p>
+        <p><strong>Amount:</strong> Rs. {{ order.amount }}</p>
+        <p><strong>Address:</strong> {{ order.address }}, {{ order.city }}, {{ order.state }}, {{ order.zip_code }}</p>
+        <p><strong>Phone:</strong> {{ order.phone }}</p>
+
+        <h3>Items</h3>
+        <ul class="list-group" id="items">
+            {% for item, details in items.items %}
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                <button id="delete{{ forloop.counter }}" class="btn btn-danger btn-sm delete" data-item="{{ item }}">X</button>
+                <span>{{ forloop.counter }}: {{ item }}</span>
+                <span>
+                    {% with qty=details.0 price=details.1 %}
+                    <button id="minus{{ forloop.counter }}" class="btn btn-primary btn-sm minus" data-item="{{ item }}">-</button>
+                    <input type="number" id="val{{ forloop.counter }}" class="form-control qty-input" value="{{ qty }}" min="0" data-item="{{ item }}">
+                    <button id="plus{{ forloop.counter }}" class="btn btn-primary btn-sm plus" data-item="{{ item }}">+</button>
+                    x Rs. {{ price }} = Rs. {{ qty|floatformat:2 }} * Rs. {{ price|floatformat:2 }}
+                    {% endwith %}
+                </span>
+            </li>
+            {% endfor %}
+            <li class="list-group-item d-flex justify-content-between align-items-center" style="background: bisque;">
+                <span>TOTAL PRICE:</span>
+                <span class="badge badge-danger badge-pill" id="totalPrice">Rs. {{ order.amount }} /-</span>
+            </li>
+        </ul>
+    </div>
+    {% elif order_not_found %}
+    <div class="alert alert-danger mt-5">
+        <strong>Error!</strong> Order not found. Please check your order ID and try again.
+    </div>
+    {% endif %}
+</div>
+
+{% endblock %}
+
+{% block js %}
+<script>
+var itemsJson = JSON.parse('{{ items|escapejs }}');
+var totalPrice = {{ order.amount }};
+
+function updateCart() {
+    var total = 0;
+    var cartItems = '';
+    var i = 0;
+    for (var item in itemsJson) {
+        var name = item;
+        var qty = itemsJson[item][0];
+        var itemPrice = itemsJson[item][1];
+        var sumPrice = qty * itemPrice;
+        total += sumPrice;
+        cartItems += `<li class="list-group-item d-flex justify-content-between align-items-center">
+            <button id="delete${i}" class="btn btn-danger btn-sm delete" data-item="${name}">X</button>
+            <span>${++i}: ${name}</span>
+            <span>
+                <button id="minus${i}" class="btn btn-primary btn-sm minus" data-item="${name}">-</button>
+                <input type="number" id="val${i}" class="form-control qty-input" value="${qty}" min="0" data-item="${name}">
+                <button id="plus${i}" class="btn btn-primary btn-sm plus" data-item="${name}">+</button>
+                x Rs. ${itemPrice} = Rs. ${sumPrice}
+            </span>
+        </li>`;
+    }
+    cartItems += `<li class="list-group-item d-flex justify-content-between align-items-center" style="background: bisque;">
+        <span>TOTAL PRICE:</span>
+        <span class="badge badge-danger badge-pill" id="totalPrice">Rs. ${total} /-</span>
+    </li>`;
+    $('#items').html(cartItems);
+    $('#totalPrice').text(total);
+    totalPrice = total;
+
+    // Update the server with the new cart state
+    $.ajax({
+        type: 'POST',
+        url: '/shop/updateorder/',
+        data: {
+            'order_id': '{{ order.order_id }}',
+            'items_json': JSON.stringify(itemsJson),
+            'csrfmiddlewaretoken': '{{ csrf_token }}'
+        },
+        success: function(response) {
+            console.log(response);
+        },
+        error: function(error) {
+            console.log(error);
+        }
+    });
+}
+
+$('#items').on('click', 'button.minus', function() {
+    var item = $(this).data('item');
+    itemsJson[item][0] = Math.max(0, itemsJson[item][0] - 1);
+    if (itemsJson[item][0] == 0) {
+        delete itemsJson[item];
+    }
+    updateCart();
+});
+
+$('#items').on('click', 'button.plus', function() {
+    var item = $(this).data('item');
+    itemsJson[item][0] += 1;
+    updateCart();
+});
+
+$('#items').on('change', 'input.qty-input', function() {
+    var item = $(this).data('item');
+    var newQty = parseInt(this.value);
+    if (newQty <= 0) {
+        delete itemsJson[item];
+    } else {
+        itemsJson[item][0] = newQty;
+    }
+    updateCart();
+});
+
+$('#items').on('click', 'button.delete', function() {
+    var item = $(this).data('item');
+    delete itemsJson[item];
+    updateCart();
+});
+</script>
+{% endblock %}

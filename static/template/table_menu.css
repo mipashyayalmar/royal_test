@@ -1,0 +1,37 @@
+#notification {
+    position: fixed;
+    top: 80px;
+    right: 20px;
+    z-index: 1000;
+    display: none;
+  }
+  .sidebar {
+    position: fixed;
+    top: 120px;
+    left: 20px;
+    width: 200px;
+  }
+  .sidebar a {
+    display: block;
+    padding: 10px;
+    margin: 5px 0;
+    color: #333;
+    text-decoration: none;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+  }
+  .sidebar a:hover {
+    background-color: #f0f0f0;
+  }
+/* Default styles */
+.product-card1 {
+    margin: 20px 0px 0px 190px;
+  }
+  @media (min-width: 1070px) {
+    .product-card1 {
+        margin: 20px 0px 0px 15px;
+    }
+  }
+  
+  
+  

@@ -1,0 +1,244 @@
+{% extends 'shop/basic.html' %}
+{% block title%} Tracker - Food Mania{% endblock %}
+{%load static%}
+<link href="{% static 'template/all_template.css' %}" rel="stylesheet">
+{% block body %}
+{% if user.is_authenticated %}
+<div class="container"style="margin-top: 120px ;">
+    <div class="col my-4">
+        <h2>Enter your Order Id and Email address to track your order</h2>
+        <form method="post" action="#" id="trackerForm">{% csrf_token %}
+            <div class="form-row">
+                <div class="form-group col-md-4">
+                    <b><label for="orderId">Order Id: </label></b>
+                    <input type="number" class="form-control" id="orderId" name="orderId" placeholder="Order Id" required>
+                </div>
+                <div class="form-group col-md-4">
+                    <b><label for="email">Email: </label></b>
+                    <input type="email" class="form-control" id="email" name="email" placeholder="Email" required>
+                </div>
+                <div class="form-group col-md-4">
+                    <b><label for="pass">Password: </label></b>
+                    <input type="password" class="form-control" id="pass" name="pass" placeholder="Enter Password" required data-toggle="password">
+                </div>
+                <input type="hidden" name="name" id="name" value="{{ request.user }}">
+                <button type="submit" class="btn btn-primary">Track Order</button>
+            </div>
+        </form>
+    </div>
+    <div class="col my-4" id="mydiv">
+    </div>
+</div>
+{% else %}
+<div id="cont2">
+    <div class="alert alert-info">
+        <font style="font-size:22px"><center>Before Track Your Order you need to <strong><a class="alert-link" data-toggle="modal" data-target="#loginModal">Login</a></strong></center></font>
+    </div>
+</div>
+{% endif %}
+
+{% endblock %}
+{% block js %}
+<script>
+
+$('#popcart').popover();
+updatePopover(cart);
+
+function updatePopover(cart) {
+    var popStr = "";
+    popStr = popStr + "<h5> Click <a href='/shop/checkout'><button class='btn btn-primary'>Here</button></a> to order </h5><div class='mx-2 my-2'>";
+    document.getElementById("popcart").setAttribute('data-content', popStr);
+    $('#popcart').popover();
+}
+
+$('#trackerForm').submit(function(event) {
+    $('#mydiv').empty();
+    var formData = {
+        'orderId': $('input[name=orderId]').val(),
+        'email': $('input[name=email]').val(),
+        'password': $('input[name=pass]').val(),
+        'name': $('input[name=name]').val(),
+        'csrfmiddlewaretoken': $('input[name=csrfmiddlewaretoken]').val()
+    };
+
+    $.ajax({
+            type: 'POST',
+            url: '/shop/tracker/',
+            data: formData,
+            encode: true
+        })
+
+        .done(function(data) {
+//            console.log(data)
+            $('#mydiv').empty();
+            data = JSON.parse(data);
+
+            mydiv = `<div class="my-4">
+                        <h2>Your Order Status</h2>
+                        <ul class="list-group" id="items">
+                        </ul>
+                    </div>`;
+            $('#mydiv').append(mydiv);
+
+            if (data['status'] == "success") {
+                updates = data['updates'];
+
+                mydiv = `<div class="my-4">
+                            <h2>Your Order Details</h2>
+                            <ul class="list-group" id="citems">
+                            </ul>
+                        </div>`;
+                $('#mydiv').append(mydiv);
+
+                for (i = 0; i < updates.length; i++) {
+                    let text = updates[i]['text'];
+                    let time = updates[i]['time'];
+                    var s = new Date(time).toLocaleString(undefined, {timeZone: 'Asia/Kolkata'}); 
+                    mystr = `<li class="list-group-item d-flex justify-content-between align-items-center">${text}<span class="badge badge-primary badge-pill">${s}</span></li>`
+                    $('#items').append(mystr);
+                }
+
+                // fill products details
+                cart = JSON.parse(data['itemsJson']);
+                // console.log(typeof(cart));
+
+                for (item in cart) {
+                    let name = cart[item][1];
+                    let qty = cart[item][0];
+                    mystr = `<li class="list-group-item d-flex justify-content-between align-items-center">
+                             ${name}
+                             <span class="badge badge-primary badge-pill">${qty}</span>
+                             </li>`
+                    $('#citems').append(mystr);
+                }
+            }
+            else if (data['status'] == "Invalid") {
+                alert("your Password is Wrong!!");
+                mystr = `<li class="list-group-item d-flex justify-content-between align-items-center">Your Password is Wrong</li>`
+            	$('#items').append(mystr);
+            }
+            else {
+                mystr = `<li class="list-group-item d-flex justify-content-between align-items-center">Sorry, We are not able to fetch this order id and email. Make sure to type correct order Id and email</li>`
+            	$('#items').append(mystr);
+            }
+
+        });
+        event.preventDefault();
+});
+
+
+
+
+
+// Initialize cart
+if (localStorage.getItem('cart') == null) {
+    var cart = {};
+} else {
+    cart = JSON.parse(localStorage.getItem('cart'));
+    updateCart(cart);
+}
+
+
+if (localStorage.getItem('cart') == null) {
+    var cart = {};
+} else {
+    cart = JSON.parse(localStorage.getItem('cart'));
+    updateCart(cart);
+}
+
+$('.container').on('click', 'button.cart', function() {
+    var idstr = this.id.toString();
+    if (cart[idstr] != undefined) {
+        cart[idstr][0] += 1;
+        showNotification(cart[idstr][1] + " quantity increased to " + cart[idstr][0]);
+    } else {
+        var name = document.getElementById('namepr' + idstr).innerHTML;
+        var price = document.getElementById('pricepr' + idstr).innerHTML;
+        cart[idstr] = [1, name, parseInt(price)];
+        showNotification(cart[idstr][1] + " added to cart");
+    }
+    updateCart(cart);
+});
+
+function updatePopover(cart) {
+    var popStr = "<div class='mx-2 my-2'>";
+    var i = 1;
+    var j = 0;
+    for(var item in cart) {
+        popStr += "<b>" + i + "</b>. " + cart[item][1].slice(0, 15) + "... (Qty: " + cart[item][0] + ')<br>';
+        i += 1;
+        j += 1;
+    }
+    if(j == 0) {
+        popStr += "<p><b> No item available in your cart </b></p></div><div class='mx-2 my-2'><a href='/shop'><button class='btn btn-primary'>Add items</button></a></div>";
+    } else {
+        popStr += "</div><a href='/shop/checkout'><button class='btn btn-primary' id='checkout'>Checkout</button></a> <a href='/shop/'><button class='btn btn-primary' onclick='clearCart()' id='clearCart'>Clear Cart</button></a>";
+    }
+    document.getElementById("popcart").setAttribute('data-content', popStr);
+    $('#popcart').popover();
+}
+
+function clearCart() {
+  cart = JSON.parse(localStorage.getItem('cart'));
+  for (var item in cart) {
+    document.getElementById('div' + item).innerHTML = '<button id="'+ item +'" class="btn btn-primary cart">Add to Cart</button>';
+  }
+  localStorage.clear();
+  cart = {};
+  updateCart(cart);
+}
+
+function updateCart(cart) {
+    var sum = 0;
+    var cartItems = '';
+    for (var item in cart) {
+        sum += cart[item][0];
+        cartItems += `<div class="product-card card align-items-center">
+            <div class="card-body">
+                <h5 class="card-title">${cart[item][1].slice(0, 20)}...</h5>
+                <h6 style="color: #ff0000">Rs. ${cart[item][2]} /-</h6>
+                <p>Quantity: ${cart[item][0]}</p>
+                <button id="minus${item}" class="btn btn-primary minus">-</button>
+                <span id="val${item}">${cart[item][0]}</span>
+                <button id="plus${item}" class="btn btn-primary plus">+</button>
+            </div>
+        </div>`;
+    }
+    localStorage.setItem('cart', JSON.stringify(cart));
+    document.getElementById('cart').innerHTML = sum;
+    document.getElementById('cartItems').innerHTML = cartItems;
+    updatePopover(cart);
+}
+
+$('.container').on("click", "button.minus", function() {
+    var a = this.id.slice(5);
+    cart[a][0] = Math.max(0, cart[a][0] - 1);
+    if(cart[a][0] == 0) {
+        showNotification(cart[a][1] + " removed from cart");
+        delete cart[a];
+    } else {
+        showNotification(cart[a][1] + " quantity decreased to " + cart[a][0]);
+    }
+    updateCart(cart);
+});
+
+$('.container').on("click", "button.plus", function() {
+    var a = this.id.slice(4);
+    cart[a][0] += 1;
+    showNotification(cart[a][1] + " quantity increased to " + cart[a][0]);
+    updateCart(cart);
+});
+
+function showNotification(message) {
+    var notification = document.getElementById('notification');
+    notification.innerText = message;
+    notification.style.display = 'block';
+    setTimeout(function() {
+        notification.style.display = 'none';
+    }, 2000);
+}
+
+updateCart(cart);
+
+</script>
+{% endblock %}

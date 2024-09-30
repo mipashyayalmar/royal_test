@@ -1,0 +1,145 @@
+{% extends 'shop/basic.html' %} 
+{% block title %} Home {% endblock %}
+
+{% load static %}
+{% block css %}
+<!-- Bootstrap CSS -->
+<link href="https://stackpath.bootstrapcdn.com/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+<link href="{% static 'template/search.css' %}" rel="stylesheet">
+
+{% endblock %}
+
+{% block body %}
+<div id="notification" class="alert alert-primary" role="alert"></div>
+<br>
+<div class="container-fluid">
+    <div class="row">
+        <nav class="sidebar" id="sidebar">
+            {% for category, subcats in allProds %}
+                <a href="javascript:void(0)" class="category-link" data-category="{{ category }}">{{ category|upper }}</a>
+                <div class="subcategory-list" id="subcats-{{ category }}" style="display: none;">
+                    {% for subcat, _ in subcats %}
+                        <a href="javascript:void(0)" class="subcategory-link" data-category="{{ category }}" data-subcategory="{{ subcat }}">{{ subcat }}</a>
+                    {% endfor %}
+                </div>
+            {% endfor %}
+        </nav>
+
+        <!-- Main Content -->
+        <div class="col-md-9 main-content">
+            <h3>PRODUCTS</h3>
+            <div id="productsContainer">
+                {% for category, subcats in allProds %}
+                    {% for subcat, products in subcats %}
+                        <h4 style="color: orange;">{{ subcat|upper }}</h4>
+                        <div class="subcat-products" id="products-{{ category|escapejs }}-{{ subcat|escapejs }}" style="display: flex; flex-direction: row; flex-wrap: wrap;">
+                            <br>
+                            {% for product in products %}
+                                <div class="product-card card align-items-center" style="margin: 10px;">
+                                    <img src='/media/{{ product.image }}' class="card-img-top" alt="{{ product.product_name }}">
+                                    <div class="card-body">
+                                        <h5 class="card-title" id="namepr{{ product.id }}">{{ product.product_name|slice:"0:20" }}...</h5>
+                                        <h6 style="color: #ff0000">Rs. <span id="pricepr{{ product.id }}">{{ product.price }}</span> /-</h6>
+                                        <p class="card-text">{{ product.desc|slice:"0:23" }}...</p>
+                                        <div id="divpr{{ product.id }}">
+                                            <button id="pr{{ product.id }}" class="btn btn-primary cart" style='border:1px solid black;margin:2px;'>+ Add</button>
+                                            <a href="/shop/productView/{{ product.id }}" class="btn btn-primary">View</a>
+                                        </div>
+                                        <br>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% endfor %}
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container my-2">
+    <center><h3>SELECTED CART ITEMS</h3></center>
+    <div id="cartItems" class="product-container"></div>
+    <div id="cartTotal" style="text-align: center; margin-top: 20px;">
+        <h4>Total: Rs. <span id="totalPrice">0</span> /-</h4>
+        <a href="/shop/checkout" class="btn btn-primary" id="checkoutBtn">Checkout</a>
+    </div>
+</div>
+{% endblock %}
+
+{% block js %}
+<!-- Bootstrap Bundle with Popper.js -->
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+
+<script>
+if (localStorage.getItem('cart') == null) {
+    var cart = {};
+} else {
+    cart = JSON.parse(localStorage.getItem('cart'));
+    updateCart(cart);
+}
+
+document.addEventListener('click', function(event) {
+    if (event.target.classList.contains('cart')) {
+        var idstr = event.target.id.toString().slice(2);
+        if (cart[idstr] !== undefined) {
+            cart[idstr][0] += 1; // Increment quantity
+            showNotification(cart[idstr][1] + " quantity increased to " + cart[idstr][0]);
+        } else {
+            var name = document.getElementById('namepr' + idstr).innerHTML;
+            var price = document.getElementById('pricepr' + idstr).innerHTML;
+            cart[idstr] = [1, name, parseInt(price)]; // Add new item to cart
+            showNotification(cart[idstr][1] + " added to cart");
+        }
+        updateCart(cart);
+    }
+});
+
+function updateCart(cart) {
+    var totalItems = 0;
+    var totalPrice = 0;
+    var cartItems = '';
+
+    for (var item in cart) {
+        totalItems += cart[item][0]; // Count items
+        totalPrice += cart[item][0] * cart[item][2]; // Calculate total price
+        
+        cartItems += <div class="product-card card align-items-center" style="margin: 5px;">
+            <div class="card-body">
+                <h5 class="card-title">${cart[item][1].slice(0, 20)}...</h5>
+                <h6 style="color: #ff0000">Rs. ${cart[item][2]} /-</h6>
+                <p>Quantity: ${cart[item][0]}</p>
+            </div>
+        </div>;
+    }
+    
+    localStorage.setItem('cart', JSON.stringify(cart)); // Update local storage
+    document.getElementById('cartItems').innerHTML = cartItems; // Display cart items
+    document.getElementById('totalPrice').innerText = totalPrice; // Display total price
+}
+
+function showNotification(message) {
+    var notification = document.getElementById('notification');
+    notification.innerText = message;
+    notification.style.display = 'flex';
+    setTimeout(function() {
+        notification.style.display = 'none';
+    }, 2000);
+}
+
+function showProducts(category, subcat) {
+    var allSubcatProducts = document.querySelectorAll('.subcat-products');
+    allSubcatProducts.forEach(function(div) {
+        div.style.display = 'none'; // Hide all products
+    });
+
+    var selectedSubcatDiv = document.getElementById('products-' + category + '-' + subcat);
+    if (selectedSubcatDiv) {
+        selectedSubcatDiv.style.display = 'flex'; // Show selected products
+    }
+}
+
+// Initialize cart display on page load
+updateCart(cart);
+</script>
+{% endblock %}

@@ -1,0 +1,282 @@
+{% extends 'shop/basic.html' %}
+
+{% block title %} Home {% endblock %}
+
+{% load static %}
+
+{% block css %}
+<link href="{% static 'template/index.css' %}" rel="stylesheet">
+<link href="{% static 'template/table_menu.css' %}" rel="stylesheet">
+{% endblock %}
+
+{% block body %}
+<div id="notification" class="alert alert-primary" role="alert" style="display: none;"></div>
+<br>
+<div class="sidebar" id="sidebar">
+    {% for category, subcats in allProds %}
+        <a href="javascript:void(0)" class="category-link" data-category="{{ category }}">
+            {{ category|upper }}
+        </a>
+        <div class="subcategory-list" id="subcats-{{ category }}" style="display: none;">
+            {% for subcategory, products in subcats %}
+                <a href="javascript:void(0)" class="subcategory-link" data-category="{{ category }}"
+                   data-subcategory="{{ subcategory }}">{{ subcategory }}</a>
+            {% endfor %}
+        </div>
+    {% endfor %}
+</div>
+
+<div class="container mt-4" id="product-container">
+    {% for category, subcats in allProds %}
+        <div class="category-section" data-category="{{ category }}">
+            {% for subcategory, products in subcats %}
+                <div class="subcategory-section" data-subcategory="{{ subcategory }}">
+                    <center><h4 class="my-4">{{ subcategory }}</h4></center>
+                    <div class="row">
+                        {% for product in products %}
+                            <div class="col-md-4 product-card1">
+                                <div class="card align-items-center" style="width: 18rem;">
+                                    <img src='/media/{{ product.image }}' class="product-img card-img-top" alt="{{ product.product_name }}">
+                                    <div class="card-body">
+                                        <h5 id="namepr{{ product.id }}" class="product-name card-title">{{ product.product_name }}</h5>
+                                        <h6 id="pricepr{{ product.id }}" class="product-price" style="color: #ff0000">Rs. {{ product.price }} /-</h6>
+                                        <p class="product-desc card-text">{{ product.desc|slice:"0:50" }}...</p>
+                                        <div id="divpr{{ product.id }}" class="divpr">
+                                            <button id="pr{{ product.id }}" class="btn btn-primary cart">Add</button>
+                                        </div>
+                                        <a href="/shop/productView/{{ product.id }}" class="float-right">Quick View</a>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% endfor %}
+</div>
+
+<div class="container my-4">
+    <center><h3>Cart Items</h3></center>
+    <div id="cartItems" class="product-container"></div>
+</div>
+{% endblock %}
+
+{% block js %}
+<script>
+    // Initialize cart from localStorage or create a new cart
+    var cart = JSON.parse(localStorage.getItem('cart')) || {};
+
+    // Function to update the cart display
+    function updateCart(cart) {
+        var totalItems = 0;
+        var totalPrice = 0;
+        var cartItems = '';
+
+        for (var item in cart) {
+            var quantity = cart[item][0];
+            var price = cart[item][2];
+            var itemTotal = quantity * price;
+
+            totalItems += quantity;
+            totalPrice += itemTotal;
+
+            // Update product card with buttons and current quantity
+            document.getElementById('divpr' + item).innerHTML = `
+                <button id="minus${item}" class="btn btn-primary minus">-</button>
+                <span id="val${item}">${quantity}</span>
+                <button id="plus${item}" class="btn btn-primary plus">+</button>`;
+
+            // Display cart items dynamically
+            cartItems += `<div class="product-card1 card align-items-center">
+                <div class="card-body">
+                    <h5 class="card-title">${cart[item][1].slice(0, 20)}...</h5>
+                    <h6 style="color: #ff0000">Rs. ${price} /-</h6>
+                    <p>Quantity: ${quantity}</p>
+                    <p>Total: Rs. ${itemTotal} /-</p>
+                    <button id="minus${item}" class="btn btn-primary minus">-</button>
+                    <span id="val${item}">${quantity}</span>
+                    <button id="plus${item}" class="btn btn-primary plus">+</button>
+                </div>
+            </div>`;
+        }
+
+        localStorage.setItem('cart', JSON.stringify(cart));
+        document.getElementById('cartItems').innerHTML = cartItems;
+
+        // Update the total price display
+        var totalPriceDiv = `<div class="total-price mt-4">
+                                <center><h4>Total Price: Rs. ${totalPrice} /-</h4></center>
+                             </div>`;
+        document.getElementById('cartItems').insertAdjacentHTML('beforeend', totalPriceDiv);
+    }
+
+    // Add event listeners for cart buttons
+    document.addEventListener('click', function(event) {
+        var target = event.target;
+
+        if (target.classList.contains('cart')) {
+            var idstr = target.id.toString().slice(2);
+            if (cart[idstr]) {
+                cart[idstr][0] += 1; // Increase quantity
+            } else {
+                var name = document.getElementById('namepr' + idstr).innerHTML;
+                var price = document.getElementById('pricepr' + idstr).innerHTML.replace('Rs. ', '').replace(' /-', '');
+                cart[idstr] = [1, name, parseInt(price)];
+            }
+            updateCart(cart);
+            showNotification(cart[idstr][1] + " added to cart");
+        }
+
+        // Handle + button click
+        if (target.classList.contains('plus')) {
+            var id = target.id.replace('plus', '');
+            cart[id][0] += 1;
+            updateCart(cart);
+        }
+
+        // Handle - button click
+        if (target.classList.contains('minus')) {
+            var id = target.id.replace('minus', '');
+            if (cart[id][0] > 1) {
+                cart[id][0] -= 1; // Reduce quantity
+            } else {
+                delete cart[id]; // Remove item if quantity is 0
+            }
+            updateCart(cart);
+        }
+    });
+
+    // Show subcategories on category click
+    document.querySelectorAll('.category-link').forEach(link => {
+        link.addEventListener('click', function() {
+            var category = this.getAttribute('data-category');
+            var subcatList = document.getElementById('subcats-' + category);
+            var allSubcatLists = document.querySelectorAll('.subcategory-list');
+            
+            allSubcatLists.forEach(list => {
+                if (list !== subcatList) {
+                    list.style.display = 'none';
+                }
+            });
+
+            subcatList.style.display = subcatList.style.display === 'none' ? 'block' : 'none';
+        });
+    });
+
+    // Filter products by subcategory
+    document.querySelectorAll('.subcategory-link').forEach(link => {
+        link.addEventListener('click', function() {
+            var category = this.getAttribute('data-category');
+            var subcategory = this.getAttribute('data-subcategory');
+            document.querySelectorAll('.category-section').forEach(section => {
+                if (section.getAttribute('data-category') === category) {
+                    section.style.display = 'block';
+                    section.querySelectorAll('.subcategory-section').forEach(subSection => {
+                        subSection.style.display = subSection.getAttribute('data-subcategory') === subcategory ? 'block' : 'none';
+                    });
+                } else {
+                    section.style.display = 'none';
+                }
+            });
+        });
+    });
+
+    // Notification function
+    function showNotification(message) {
+        var notification = document.getElementById('notification');
+        notification.innerText = message;
+        notification.style.display = 'block';
+        setTimeout(function() {
+            notification.style.display = 'none';
+        }, 2000);
+    }
+
+    updateCart(cart);  // Update cart on page load
+
+
+    // Function to update the cart display
+function updateCart(cart) {
+    var totalItems = 0;
+    var totalPrice = 0;
+    var cartItems = '';
+
+    for (var item in cart) {
+        var quantity = cart[item][0];
+        var price = cart[item][2];
+        var itemTotal = quantity * price;
+
+        totalItems += quantity;
+        totalPrice += itemTotal;
+
+        cartItems += `
+            <div class="cart-item">
+                <p><strong>${cart[item][1]}</strong> - Rs. ${price} x ${quantity}</p>
+                <button class="btn btn-sm btn-danger" onclick="removeFromCart('${item}')">Remove</button>
+            </div>
+        `;
+    }
+
+    if (totalItems === 0) {
+        cartItems = '<p>Your cart is empty</p>';
+    }
+
+    // Update the cart button with the total number of items
+    document.getElementById('cart-count').textContent = totalItems;
+
+    // Update the popover content
+    var popoverContent = `
+        <div id="cart-items">
+            ${cartItems}
+        </div>
+        <div class="total-price mt-4 text-center">
+            <h5>Total: Rs. ${totalPrice} /-</h5>
+        </div>
+           <div class="checkout-section">
+        {% if category_id %}
+    <a href="{% url 'shop:checkout' category_id=category_id %}" class="btn btn-success mt-2">Checkout</a>
+{% else %}
+    <p>Please select a category to proceed to checkout.</p>
+{% endif %}
+
+
+    </div>
+
+    `;
+
+    // Dynamically update the popover content
+    $('#popcart').attr('data-content', popoverContent);
+
+    // Reinitialize the popover to apply the new content
+    $('#popcart').popover('dispose'); // Destroy old popover instance
+    $('#popcart').popover({ html: true }).popover('show'); // Recreate and show new one
+}
+
+// Add to cart function
+function addToCart(id, name, price) {
+    if (cart[id]) {
+        cart[id][0] += 1; // Increase the quantity if the item already exists
+    } else {
+        cart[id] = [1, name, price]; // Add new item to cart
+    }
+    localStorage.setItem('cart', JSON.stringify(cart)); // Save cart to localStorage
+    updateCart(cart); // Update the cart UI
+}
+
+// Remove item from cart function
+function removeFromCart(id) {
+    delete cart[id]; // Remove the item from the cart
+    localStorage.setItem('cart', JSON.stringify(cart)); // Update localStorage
+    updateCart(cart); // Update the cart UI
+}
+
+// Initialize the popover and cart display on page load
+$(document).ready(function() {
+    $('#popcart').popover({ html: true });
+    updateCart(cart); // Initialize the cart display with any existing items
+});
+
+
+
+</script>
+{% endblock %}

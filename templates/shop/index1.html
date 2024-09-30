@@ -1,0 +1,220 @@
+{% extends 'shop/basic.html' %}
+
+{% block title %} Home {% endblock %}
+
+{% load static %}
+
+{% block css %}
+<link href="{% static 'template/index.css' %}" rel="stylesheet">
+<style>
+  #notification {
+    position: fixed;
+    top: 80px;
+    right: 20px;
+    z-index: 1000;
+    display: none;
+  }
+  .sidebar {
+    position: fixed;
+    top: 120px;
+    left: 20px;
+    width: 200px;
+  }
+  .sidebar a {
+    display: block;
+    padding: 10px;
+    margin: 5px 0;
+    color: #333;
+    text-decoration: none;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+  }
+  .sidebar a:hover {
+    background-color: #f0f0f0;
+  }
+/* Default styles */
+.product-card1 {
+    margin: 20px 0px 0px 190px;
+  }
+  @media (min-width: 1070px) {
+    .product-card1 {
+        margin: 20px 0px 0px 15px;
+    }
+  }
+  
+  
+  
+</style>
+{% endblock %}
+
+{% block body %}
+<div id="notification" class="alert alert-primary" role="alert"></div>
+<br>
+<div class="sidebar" id="sidebar">
+    {% for category, subcats in allProds %}
+        <a href="javascript:void(0)" class="category-link" data-category="{{ category }}" style="background-color:white; color:black; font-weight:200; font-size:20px; font-family:sans-serif;">{{ category|upper }}</a>
+        <div class="subcategory-list" id="subcats-{{ category }}" style="display: none;">
+            {% for subcategory, products in subcats %}
+                <a href="javascript:void(0)" class="subcategory-link" data-category="{{ category }}" data-subcategory="{{ subcategory }}">{{ subcategory }}</a>
+            {% endfor %}
+        </div>
+    {% endfor %}
+</div>
+
+<div class="container mt-4" id="product-container">
+    {% for category, subcats in allProds %}
+        <div class="category-section" data-category="{{ category }}">
+            {% for subcategory, products in subcats %}
+                <div class="subcategory-section" data-subcategory="{{ subcategory }}">
+                   <center> <h4 class="my-4">{{ subcategory }}</h4></center>
+                    <div class="row">
+                        {% for product in products %}
+                            <div class="col-md-4 product-card1">
+                                <div class="card align-items-center" style="width: 18rem;">
+                                    <img src='/media/{{ product.image }}' class="product-img card-img-top" alt="{{ product.product_name }}">
+                                    <div class="card-body">
+                                        <h5 class="product-name card-title" id="namepr{{ product.id }}">{{ product.product_name }}...</h5>
+                                        <h6 class="product-price" style="color: #ff0000">Rs. <i id="pricepr{{ product.id }}">{{ product.price }}</i> /-</h6>
+                                        <p class="product-desc card-text">{{ product.desc|slice:"0:50" }}...</p>
+                                        <div id="divpr{{ product.id }}" class="divpr">
+                                            <button id="pr{{ product.id }}" class="btn btn-primary cart">Add</button>
+                                        </div>
+                                        <a href="/shop/productView/{{ product.id }}" id="qv{{ product.id }}" class="float-right">Quick View</a>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% endfor %}
+</div>
+
+<div class="container my-4">
+   <center> <h3>Cart Items</h3></center>
+    <div id="cartItems" class="product-container"></div>
+</div>
+{% endblock %}
+
+{% block js %}
+<script>
+    // Initialize cart from localStorage or create a new cart
+    let cart = JSON.parse(localStorage.getItem('cart')) || {};
+    
+    // Function to update the cart UI and localStorage
+    function updateCart(cart) {
+        let totalItems = 0;
+        let totalPrice = 0;
+        let cartItemsHTML = '';
+    
+        // Iterate through cart items to calculate totals and build UI
+        for (let item in cart) {
+            const quantity = cart[item][0];
+            const price = cart[item][2];
+            const itemTotal = quantity * price;
+    
+            totalItems += quantity;
+            totalPrice += itemTotal;
+    
+            // Update the buttons to manage quantities
+            document.getElementById('divpr' + item).innerHTML = `
+                <button id="minus${item}" class="btn btn-primary minus">-</button>
+                <span id="val${item}">${quantity}</span>
+                <button id="plus${item}" class="btn btn-primary plus">+</button>`;
+    
+            // Build HTML for cart items
+            cartItemsHTML += `
+                <div class="product-card1 card align-items-center">
+                    <div class="card-body">
+                        <h5 class="card-title">${cart[item][1].slice(0, 20)}...</h5>
+                        <h6 style="color: #ff0000">Rs. ${price} /-</h6>
+                        <p>Quantity: ${quantity}</p>
+                        <p>Total: Rs. ${itemTotal} /-</p>
+                        <button id="minus${item}" class="btn btn-primary minus">-</button>
+                        <span id="val${item}">${quantity}</span>
+                        <button id="plus${item}" class="btn btn-primary plus">+</button>
+                    </div>
+                </div>`;
+        }
+    
+        // Save cart to localStorage
+        localStorage.setItem('cart', JSON.stringify(cart));
+    
+        // Update UI elements for cart total and items
+        document.getElementById('cart').innerHTML = totalItems;
+        document.getElementById('cartItems').innerHTML = cartItemsHTML;
+    
+        // Update the total price display
+        const totalPriceDiv = `
+            <div class="total-price mt-4">
+                <center><h4>Total Price: Rs. ${totalPrice} /-</h4></center>
+            </div>`;
+        document.getElementById('cartItems').insertAdjacentHTML('beforeend', totalPriceDiv);
+    
+        updatePopover(cart);
+    }
+    
+    // Clear cart functionality
+    function clearCart() {
+        // Reset cart and localStorage
+        cart = {};
+        localStorage.clear();
+    
+        // Update the UI
+        updateCart(cart);
+        showNotification("Cart has been cleared.");
+    }
+    
+    // Show notification for cart actions
+    function showNotification(message) {
+        const notification = document.getElementById('notification');
+        notification.innerText = message;
+        notification.style.display = 'block';
+        setTimeout(() => {
+            notification.style.display = 'none';
+        }, 2000);
+    }
+    
+    // Show subcategories on category click
+    document.querySelectorAll('.category-link').forEach(link => {
+        link.addEventListener('click', function() {
+            const category = this.getAttribute('data-category');
+            const subcatList = document.getElementById('subcats-' + category);
+            const allSubcatLists = document.querySelectorAll('.subcategory-list');
+    
+            // Toggle the display of the selected subcategory list
+            allSubcatLists.forEach(list => {
+                if (list !== subcatList) {
+                    list.style.display = 'none';
+                }
+            });
+            subcatList.style.display = subcatList.style.display === 'none' ? 'block' : 'none';
+        });
+    });
+    
+    // Filter products by subcategory
+    document.querySelectorAll('.subcategory-link').forEach(link => {
+        link.addEventListener('click', function() {
+            const category = this.getAttribute('data-category');
+            const subcategory = this.getAttribute('data-subcategory');
+    
+            // Show/hide category sections based on selected subcategory
+            document.querySelectorAll('.category-section').forEach(section => {
+                if (section.getAttribute('data-category') === category) {
+                    section.style.display = 'block';
+                    section.querySelectorAll('.subcategory-section').forEach(subSection => {
+                        subSection.style.display = subSection.getAttribute('data-subcategory') === subcategory ? 'block' : 'none';
+                    });
+                } else {
+                    section.style.display = 'none';
+                }
+            });
+        });
+    });
+    
+    // Initialize cart display on page load
+    updateCart(cart);
+    </script>
+    
+{% endblock %}

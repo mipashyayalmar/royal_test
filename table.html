@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Table View</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f8f9fa;
+        }
+        .container {
+            padding: 20px;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .header button {
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin: 0 5px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        .header button:hover {
+            background-color: #c82333;
+        }
+        .header .right-buttons button {
+            background-color: #28a745;
+        }
+        .header .right-buttons button:hover {
+            background-color: #218838;
+        }
+        .header .right-buttons button:nth-child(2) {
+            background-color: #ffc107;
+        }
+        .header .right-buttons button:nth-child(2):hover {
+            background-color: #e0a800;
+        }
+        .header .right-buttons button:nth-child(3) {
+            background-color: #007bff;
+        }
+        .header .right-buttons button:nth-child(3):hover {
+            background-color: #0069d9;
+        }
+        .table-status {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .table-status .status {
+            display: flex;
+            align-items: center;
+        }
+        .table-status .status span {
+            margin-left: 10px;
+        }
+        .table-status .status span.blank {
+            background-color: #e9ecef;
+        }
+        .table-status .status span.running {
+            background-color: #007bff;
+        }
+        .table-status .status span.printed {
+            background-color: #28a745;
+        }
+        .table-status .status span.paid {
+            background-color: #ffc107;
+        }
+        .table-status .status span.running-kot {
+            background-color: #ffc107;
+        }
+        .table-status .status span {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+        }
+        .section {
+            margin-bottom: 20px;
+        }
+        .section h3 {
+            margin-bottom: 10px;
+            color: #6c757d;
+        }
+        .table-view {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .table {
+            width: 100px;
+            height: 100px;
+            border: 2px dashed #6c757d;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 5px;
+            position: relative;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #e9ecef, #f8f9fa);
+            cursor: pointer; /* Hand cursor */
+            transition: background-color 0.3s;
+        }
+        .table:hover {
+            background-color: rgba(0, 123, 255, 0.2); /* Light blue on hover */
+        }
+        .table.active {
+            background-color: rgba(0, 255, 0, 0.3); /* Faint green for active selection */
+        }
+        .table-view .table.running-kot {
+            background-color: #ffc107;
+        }
+        .table-view .table .info {
+            text-align: center;
+        }
+        .table-view .table .info .time {
+            font-size: 12px;
+        }
+        .table-view .table .info .price {
+            font-size: 14px;
+            font-weight: bold;
+        }
+        .table-view .table .info .icon {
+            position: absolute;
+            bottom: 5px;
+            right: 5px;
+        }
+        .table-view .table .info .icon i {
+            font-size: 16px;
+        }
+        .inquiry {
+            text-align: center;
+            font-size: 18px;
+            color: #ff0000;
+            font-weight: bold;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div>
+                <button>+ Table Reservation</button>
+                <button>+ Contactless</button>
+            </div>
+            <div class="right-buttons">
+                <button>Delivery</button>
+                <button>Pick Up</button>
+                <button>+ Add Table</button>
+            </div>
+        </div>
+        <div class="table-status">
+            <div class="status">
+                <input type="radio" name="status" id="move-kot">
+                <label for="move-kot">Move KOT / Items</label>
+            </div>
+            <div class="status">
+                <span class="blank"></span> Blank Table
+                <span class="running"></span> Running Table
+                <span class="printed"></span> Printed Table
+                <span class="paid"></span> Paid Table
+                <span class="running-kot"></span> Running KOT Table
+            </div>
+        </div>
+        <div class="section">
+            <h3>Ground Floor</h3>
+            <div class="table-view">
+                <div class="table" onclick="toggleTable(this)"><div class="info">1</div></div>
+                <div class="table" onclick="toggleTable(this)"><div class="info">2</div></div>
+                <div class="table" onclick="toggleTable(this)"><div class="info">3</div></div>
+                <div class="table running-kot" onclick="toggleTable(this)">
+                    <div class="info">
+                        <div class="time">2 Min</div>
+                        <div class="price">₹705.00</div>
+                        <div class="icon"><i class="fas fa-eye"></i></div>
+                    </div>
+                </div>
+                <div class="table running-kot" onclick="toggleTable(this)">
+                    <div class="info">
+                        <div class="time">1 Min</div>
+                        <div class="price">₹155.00</div>
+                        <div class="icon"><i class="fas fa-eye"></i></div>
+                    </div>
+                </div>
+                <div class="table running-kot" onclick="toggleTable(this)">
+                    <div class="info">
+                        <div class="time">1 Min</div>
+                        <div class="price">₹180.00</div>
+                        <div class="icon"><i class="fas fa-eye"></i></div>
+                    </div>
+                </div>
+                <div class="table" onclick="toggleTable(this)"><div class="info">7</div></div>
+                <div class="table" onclick="toggleTable(this)"><div class="info">8</div></div>
+                <div class="table" onclick="toggleTable(this)"><div class="info">9</div></div>
+                <div class="table" onclick="toggleTable(this)"><div class="info">10</div></div>
+            </div>
+        </div>
+        <div class="section">
+            <h3>BASEMENT</h3>
+            <div class="table-view">
+                <div class="table" onclick="toggleTable(this)"><div class="info">11</div></div>
+                <div class="table" onclick="toggleTable(this)"><div class="info">12</div></div>
+                <div class="table running-kot" onclick="toggleTable(this)">
+                    <div class="info">
+                        <div class="time">0 Min</div>
+                        <div class="price">₹250.00</div>
+                        <div class="icon"><i class="fas fa-eye"></i></div>
+                    </div>
+                </div>
+                <div class="table" onclick="toggleTable(this)"><div class="info">14</div></div>
+                <div class="table" onclick="toggleTable(this)"><div class="info">15</div></div>
+                <div class="table" onclick="toggleTable(this)"><div class="info">16</div></div>
+                <div class="table" onclick="toggleTable(this)"><div class="info">17</div></div>
+                <div class="table" onclick="toggleTable(this)"><div class="info">18</div></div>
+                <div class="table" onclick="toggleTable(this)"><div class="info">19</div></div>
+                <div class="table" onclick="toggleTable(this)"><div class="info">20</div></div>
+            </div>
+        </div>
+        <div class="section">
+            <h3>Party Hall</h3>
+            <div class="table-view">
+                <div class="table" onclick="toggleTable(this)"><div class="info">Hall 1</div></div>
+                <div class="table" onclick="toggleTable(this)"><div class="info">Hall 2</div></div>
+            </div>
+        </div>
+        <div class="inquiry">For Inquiry Call or WhatsApp : 9034142334</div>
+    </div>
+
+    <script>
+        function toggleTable(table) {
+            table.classList.toggle('active');
+        }
+    </script>
+</body>
+</html>
